@@ -1,9 +1,13 @@
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules, fpgrowth
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 import pandas as pd
 
 # Veri setini yükleyin
 data = data = pd.read_csv('dataset/Frogs_MFCCs.csv')
+
+print("###################################### FREQUENT PATTERN MINING MODELS ###########################################")
 
 # MFCC özelliklerini alın
 features = data.columns[-4:]  # Son dört sütun Family, Genus, Species ve RecordID olduğunu varsayalım
@@ -51,3 +55,33 @@ print("Sık Öğeler:")
 print(frequent_itemsets)
 print("\nİlişkisel Kurallar:")
 print(rules)
+
+print("###################################### CLUSTERING ANALYSIS METHODS ###########################################")
+
+print(data.describe())
+
+df = pd.DataFrame(data, columns=['MFCCs_ 1', 'MFCCs_ 2', 'MFCCs_ 3', 'MFCCs_ 4', 'MFCCs_ 5', 'MFCCs_ 6', 'MFCCs_ 7', 'MFCCs_ 8', 'MFCCs_ 9', 'MFCCs_10', 'MFCCs_11', 'MFCCs_12', 'MFCCs_13', 'MFCCs_14', 'MFCCs_15', 'MFCCs_16', 'MFCCs_17', 'MFCCs_18', 'MFCCs_19', 'MFCCs_20', 'MFCCs_21', 'MFCCs_22', 'Family', 'Genus', 'Species', 'RecordID'])
+# K-means modelini oluştur ve uygula
+k = 7  # Küme sayısı
+features = df[['MFCCs_ 1', 'MFCCs_ 2', 'MFCCs_ 3', 'MFCCs_ 4', 'MFCCs_ 5', 'MFCCs_ 6', 'MFCCs_ 7', 'MFCCs_ 8', 'MFCCs_ 9', 'MFCCs_10', 'MFCCs_11', 'MFCCs_12', 'MFCCs_13', 'MFCCs_14', 'MFCCs_15', 'MFCCs_16', 'MFCCs_17', 'MFCCs_18', 'MFCCs_19', 'MFCCs_20', 'MFCCs_21', 'MFCCs_22']]
+kmeans = KMeans(n_clusters=k, random_state=42)
+kmeans.fit(features)
+
+# Küme etiketlerini al
+labels = kmeans.labels_
+
+# Kümeleme sonuçlarını DataFrame'e ekle
+df['Cluster'] = labels
+
+# WCSS metriğini hesapla
+wcss = kmeans.inertia_
+
+# Silhouette Coefficient metriğini hesapla
+silhouette_avg = silhouette_score(features, labels)
+
+# Sonuçları görüntüle
+print("WCSS:", wcss)
+print("Silhouette Coefficient:", silhouette_avg)
+
+# Sonuçları görüntüle
+#print(df.sample(20))
