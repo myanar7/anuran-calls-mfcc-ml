@@ -1,6 +1,6 @@
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules, fpgrowth
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, AgglomerativeClustering, DBSCAN
 from sklearn.metrics import silhouette_score
 import pandas as pd
 
@@ -58,13 +58,13 @@ print(rules)
 
 print("###################################### CLUSTERING ANALYSIS METHODS ###########################################")
 
-print(data.describe())
+#print(data.describe())
 
 df = pd.DataFrame(data, columns=['MFCCs_ 1', 'MFCCs_ 2', 'MFCCs_ 3', 'MFCCs_ 4', 'MFCCs_ 5', 'MFCCs_ 6', 'MFCCs_ 7', 'MFCCs_ 8', 'MFCCs_ 9', 'MFCCs_10', 'MFCCs_11', 'MFCCs_12', 'MFCCs_13', 'MFCCs_14', 'MFCCs_15', 'MFCCs_16', 'MFCCs_17', 'MFCCs_18', 'MFCCs_19', 'MFCCs_20', 'MFCCs_21', 'MFCCs_22', 'Family', 'Genus', 'Species', 'RecordID'])
 # K-means modelini oluştur ve uygula
-k = 7  # Küme sayısı
+k = 4  # Küme sayısı
 features = df[['MFCCs_ 1', 'MFCCs_ 2', 'MFCCs_ 3', 'MFCCs_ 4', 'MFCCs_ 5', 'MFCCs_ 6', 'MFCCs_ 7', 'MFCCs_ 8', 'MFCCs_ 9', 'MFCCs_10', 'MFCCs_11', 'MFCCs_12', 'MFCCs_13', 'MFCCs_14', 'MFCCs_15', 'MFCCs_16', 'MFCCs_17', 'MFCCs_18', 'MFCCs_19', 'MFCCs_20', 'MFCCs_21', 'MFCCs_22']]
-kmeans = KMeans(n_clusters=k, random_state=42)
+kmeans = KMeans(n_clusters=k, random_state=42, n_init=4)
 kmeans.fit(features)
 
 # Küme etiketlerini al
@@ -80,8 +80,31 @@ wcss = kmeans.inertia_
 silhouette_avg = silhouette_score(features, labels)
 
 # Sonuçları görüntüle
+print(df.sample(5))
+
 print("WCSS:", wcss)
 print("Silhouette Coefficient:", silhouette_avg)
 
-# Sonuçları görüntüle
-#print(df.sample(20))
+# AgglomerativeClustering modelini oluşturma ve uygulama
+agg_clustering = AgglomerativeClustering(n_clusters=4)  # Küme sayısını isteğe bağlı olarak belirleyin
+clusters = agg_clustering.fit_predict(features)
+
+# Sonuçları elde etme
+df['Cluster'] = clusters
+
+# Sonuçları görüntüleme
+print(df.sample(5))
+
+silhouette_avg = silhouette_score(features, clusters)
+print("Silhouette Score:", silhouette_avg)
+
+# DBSCAN modelini oluşturma ve uygulama
+dbscan = DBSCAN(eps=1.1, min_samples=5)  # eps ve min_samples değerlerini isteğe bağlı olarak ayarlayın
+clusters = dbscan.fit_predict(features)
+
+# Sonucu görüntüleme
+print(df.sample(5))
+
+silhouette_avg = silhouette_score(features, clusters)
+print("Silhouette Skoru:", silhouette_avg)
+
