@@ -2,10 +2,23 @@ from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules, fpgrowth
 from sklearn.cluster import KMeans, AgglomerativeClustering, DBSCAN
 from sklearn.metrics import silhouette_score
+from scipy.stats import zscore
 import pandas as pd
+import numpy as np
 
 # Load dataset
 data = data = pd.read_csv('dataset/Frogs_MFCCs.csv')
+
+# Set the numerical columns (excludes Family, Genus, Species, RecordID)
+numerical_columns = ['MFCCs_ 1', 'MFCCs_ 2', 'MFCCs_ 3', 'MFCCs_ 4', 'MFCCs_ 5', 'MFCCs_ 6', 'MFCCs_ 7', 'MFCCs_ 8', 'MFCCs_ 9', 'MFCCs_10', 'MFCCs_11', 'MFCCs_12', 'MFCCs_13', 'MFCCs_14', 'MFCCs_15', 'MFCCs_16', 'MFCCs_17', 'MFCCs_18', 'MFCCs_19', 'MFCCs_20', 'MFCCs_21', 'MFCCs_22']
+
+# Preprocess data
+# Normalization and replacing outliers using median for numerical columns (excludes Family, Genus, Species, RecordID) using z-score
+for column in numerical_columns:
+    data[column] = zscore(data[column]) # Standardize the column data
+    outliers = data[np.abs(data[column]) > 3].index # Find indices of outliers
+    print(f"For column {column}, number of outliers is: {len(outliers)}")
+    data.loc[outliers, column] = data[column].median() # Replace outliers with median
 
 print("###################################### FREQUENT PATTERN MINING MODELS ###########################################")
 
@@ -105,4 +118,3 @@ print(df.sample(5))
 
 silhouette_avg = silhouette_score(features, clusters)
 print("Silhouette Score:", silhouette_avg)
-
